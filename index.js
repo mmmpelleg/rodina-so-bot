@@ -451,7 +451,7 @@ bot.on('raw', async event => {
                 }
                 await field_user.addRole(field_role); // Выдать роль по соответствию с тэгом
                 let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
-                if (!field_user.roles.some(r => r == govrole) && gos.includes(field_role.name)){
+                if (!field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.addRole(govrole)
                 }
                 channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил запрос от ${field_nickname}, с ID: ${field_user.id}\``);
@@ -483,7 +483,7 @@ bot.on('raw', async event => {
                 }
                 field_user.removeRole(field_role);
                 let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
-                if (field_user.roles.some(r => r == govrole) && gos.includes(field_role.name)){
+                if (field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.removeRole(govrole)
                 }
                 channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил снятие роли (${field_role.name}) от\` <@${field_author.id}>, \`пользователю\` <@${field_user.id}>, \`с ID: ${field_user.id}\``);
