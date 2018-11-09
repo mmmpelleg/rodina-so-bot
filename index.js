@@ -6,8 +6,9 @@ let requests = JSON.parse(fs.readFileSync("./database/requests.json", "utf8"));
 let blacklist = JSON.parse(fs.readFileSync("./database/blacklist names.json", "utf8"));
 let reqrem = JSON.parse(fs.readFileSync("./database/requests remove.json", "utf8"));
 
-const nrpnames = new Set();
-const sened = new Set();
+const nrpnames = new Set(); // Невалидные ники будут записаны в nrpnames
+const sened = new Set(); // Уже отправленные запросы будут записаны в sened
+const snyatie = new Set(); // Уже отправленные запросы на снятие роли быдут записаны в snyatie
 
 tags = ({
     "ПРА-ВО": "✦ Сотрудник Пра-ва ✦",
