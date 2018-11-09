@@ -26,19 +26,21 @@ tags = ({
     "РЦ": "✦ Сотрудник Радиоцентра ✦",
     "СМИ": "✦ Сотрудник Радиоцентра ✦",
 
-    "ФМ": "✦ Бандит ОПГ ✦",
-    "СТ": "✦ Бандит ОПГ ✦",
-    "СБ": "✦ Бандит ОПГ ✦",
-    "ЧК": "✦ Бандит ОПГ ✦",
+    "ФМ": "✦ Фантомасы ✦",
+    "СТ": "✦ Санитары ✦",
+    "СБ": "✦ Солнцевская Братва ✦",
+    "ЧК": "✦ Черная кошка ✦",
 
-    "КМ": "✦ Бандит Мафии ✦",
-    "УМ": "✦ Бандит Мафии ✦",
-    "РМ": "✦ Бандит Мафии ✦",
+    "КМ": "✦ Кавказская мафия ✦",
+    "УМ": "✦ Украинская мафия ✦",
+    "РМ": "✦ Русская мафия ✦",
 });
 let manytags = ["ПРА-ВО","ПРАВ-ВО","ПРАВО","ГИБДД","ГУВД","ФСБ","МЗЮ","ВМУ","МЗ-Ю","МЗ-А","АРМИЯ","ФСИН","МРЭО","ЦБ","ЖП","РЦ","СМИ","ФМ","СТ","СБ","ЧК","КМ","УМ","РМ",];
-let rolesgg = ["✦ Сотрудник Пра-ва ✦", "✦ Сотрудник МВД ✦", "✦ Сотрудник ФСБ ✦", "✦ Сотрудник Мин.Здрава ✦", "✦ Боец Армии ✦", "✦ Сотрудник ФСИН ✦", "✦ Сотрудник Центра.Лицензий ✦", "✦ Сотрудник Банка ✦", "✦ Сотрудник Радиоцентра ✦", "✦ Бандит ОПГ ✦", "✦ Бандит Мафии ✦",]
-let krominal = ["✦ Бандит ОПГ ✦", "✦ Бандит Мафии ✦"]
+let rolesgg = ["✦ Сотрудник Пра-ва ✦", "✦ Сотрудник МВД ✦", "✦ Сотрудник ФСБ ✦", "✦ Сотрудник Мин.Здрава ✦", "✦ Боец Армии ✦", "✦ Сотрудник ФСИН ✦", "✦ Сотрудник Центра.Лицензий ✦", "✦ Сотрудник Банка ✦", "✦ Сотрудник Радиоцентра ✦", "✦ Кавказская мафия ✦", "✦ Украинская мафия ✦","✦ Русская мафия ✦", "✦ Санитары ✦", "✦ Черная кошка ✦", "✦ Солнцевская Братва ✦", "✦ Фантомасы ✦"]
 let gos = ["✦ Сотрудник Пра-ва ✦", "✦ Сотрудник МВД ✦", "✦ Сотрудник ФСБ ✦", "✦ Сотрудник Мин.Здрава ✦", "✦ Боец Армии ✦", "✦ Сотрудник ФСИН ✦", "✦ Сотрудник Центра.Лицензий ✦", "✦ Сотрудник Банка ✦", "✦ Сотрудник Радиоцентра ✦"]
+let serverid = '325607843547840522';
+let canremoverole = ["★ Заместитель Лидера Криминала ★", "★ Заместитель Лидера Гос.структур ★", "★ Лидер ★", "★ Младший модератор ★", "★ Модератор ★"];
+
 
 const events = {
     MESSAGE_REACTION_ADD: 'messageReactionAdd',
@@ -48,17 +50,12 @@ const events = {
 bot.login(process.env.token);
 
 bot.on('ready', () => {
-    console.log("Бот был успешно запущен!");
-    bot.user.setPresence({ game: { name: 'hacker' }, status: 'idle' })
-    let server = bot.guilds.find(g => g.id == `325607843547840522`);
-    if (!server) return
-    let updchannel = server.channels.find(c => c.name == `requests-for-roles`);
-    if (!updchannel) return
-    updchannel.send(`\`[SYSTEM] Бот был успешно запущен! Все запросы выше данного сообщения были забагованы! Удали их!\``)
+    console.log("Бот был успешно запущен!"); // Написать что бот запущен
+    bot.user.setPresence({ game: { name: 'выдачу ролей' }, status: 'idle' }) // Установить игру
 });
 
 bot.on('message', async message => {
-    if (message.guild.id != "325607843547840522") return
+    if (message.guild.id != serverid) return
     if (message.channel.type == "dm") return // Если в ЛС, то выход.
     if (message.type === "PINS_ADD") if (message.channel.name == "requests-for-roles") message.delete();
     if (message.content == "/ping") return message.reply("`я онлайн.`") && console.log(`Бот ответил ${message.member.displayName}, что я онлайн.`)
@@ -229,33 +226,88 @@ bot.on('message', async message => {
             return message.delete();
         }
     }
+    
+    if (message.content.toLowerCase().includes("сними") || message.content.toLowerCase().includes("снять")){
+        if (!message.member.roles.some(r => canremoverole.includes(r.name)) && !message.member.hasPermission("MANAGE_ROLES")) return
+        const args = message.content.split(/ +/)
+        let onebe = false;
+        let twobe = false;
+        args.forEach(word => {
+            if (word.toLowerCase().includes(`роль`)) onebe = true
+            if (word.toLowerCase().includes(`у`)) twobe = true
+        })
+        if (!onebe || !twobe) return
+        if (message.mentions.users.size > 1) return message.react(`📛`)
+        let user = message.guild.member(message.mentions.users.first());
+        if (!user) return message.react(`📛`)
+        if (snyatie.has(message.author.id + `=>` + user.id)) return message.react(`🕖`)
+        let reqchat = message.guild.channels.find(c => c.name == `requests-for-roles`); // Найти чат на сервере.
+        if(!reqchat){
+            message.reply(`\`Ошибка выполнения. Канал requests-for-roles не был найден!\``)
+            return console.error(`Канал requests-for-roles не был найден!`)
+        }
+        let roleremove = user.roles.find(r => rolesgg.includes(r.name));
+        if (!roleremove) return message.react(`📛`)
 
-    if (message.content.toLowerCase().includes("роль")){
-        if (blacklist[message.member.displayName]){
+        message.reply(`\`напишите причину снятия роли.\``).then(answer => {
+            message.channel.awaitMessages(response => response.member.id == message.member.id, {
+                max: 1,
+                time: 60000,
+                errors: ['time'],
+            }).then((collected) => {
+                const embed = new Discord.RichEmbed()
+                .setTitle("`Discord » Запрос о снятии роли.`")
+                .setColor("#483D8B")
+                .addField("Отправитель", `\`Пользователь:\` <@${message.author.id}>`)
+                .addField("Кому снять роль", `\`Пользователь:\` <@${user.id}>`)
+                .addField("Роль для снятия", `\`Роль для снятия:\` <@&${roleremove.id}>`)
+                .addField("Отправлено с канала", `<#${message.channel.id}>`)
+                .addField("Причина снятия роли", `${collected.first().content}`)
+                .addField("Информация", `\`[✔] - снять роль\`\n` + `\`[❌] - отказать в снятии роли\`\n` + `\`[D] - удалить сообщение\``)
+                .setFooter("© Support Team | by Kory_McGregor")
+                .setTimestamp()
+                reqchat.send(embed).then(async msgsen => {
+                    answer.delete();
+                    collected.first().delete();
+                    await msgsen.react('✔')
+                    await msgsen.react('❌')
+                    await msgsen.react('🇩')
+                    await msgsen.pin();
+                })
+                snyatie.add(message.author.id + `=>` + user.id)
+                return message.react(`📨`);
+            }).catch(() => {
+                return answer.delete()
+            });
+        });
+    }
+    
+    if (message.content.toLowerCase().includes("роль") && !message.content.toLowerCase().includes(`сними`) && !message.content.toLowerCase().includes(`снять`)){
+        // Проверить невалидный ли ник.
+        if (nrpnames.has(message.member.displayName)){
             if(message.member.roles.some(r=>rolesgg.includes(r.name)) ) {
                 for (var i in rolesgg){
                     let rolerem = bot.guilds.find(g => g.id == message.guild.id).roles.find(r => r.name == rolesgg[i]);
                     if (message.member.roles.some(role=>[rolesgg[i]].includes(role.name))){
-                        await message.member.removeRole(rolerem);
+                        await message.member.removeRole(rolerem); // Забрать роли указанные ранее.
                     }
                 }
             }
-            let krimrole = message.guild.roles.find(r => r.name == `✦ Криминал ✦`);
             let govrole = message.guild.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
-            if (message.member.roles.some(r => r == krimrole)){
-                await message.member.removeRole(krimrole)
-            }
             if (message.member.roles.some(r => r == govrole)){
                 await message.member.removeRole(govrole)
             }
-            message.react(`📛`)
-            return message.reply(`\`Модератор\` <@${blacklist[message.member.displayName].moderatorid}> \`отметил данный ник как невалидный!\nСоставьте никнейм по форме: [Фракция Ранг/10] Имя_Фамилия\``).then(msg => msg.delete(30000));
+            message.react(`📛`) // Поставить знак стоп под отправленным сообщением.
+            return // Выход
         }
+        // Проверить все доступные тэги
         for (var i in manytags){
-            if (message.member.displayName.toLowerCase().includes(manytags[i].toLowerCase())){
-                let rolename = tags[manytags[i].toUpperCase()]
-                let role = message.guild.roles.find(r => r.name == rolename);
-                let reqchat = message.guild.channels.find(c => c.name == `requests-for-roles`);
+            let nicknametest = message.member.displayName.toLowerCase();
+            nicknametest = nicknametest.replace(/ /g, '');
+            if (nicknametest.includes("[" + manytags[i].toLowerCase()) || nicknametest.includes(manytags[i].toLowerCase() + "]") || nicknametest.includes("(" + manytags[i].toLowerCase()) || nicknametest.includes(manytags[i].toLowerCase() + ")") || nicknametest.includes("{" + manytags[i].toLowerCase()) || nicknametest.includes(manytags[i].toLowerCase() + "}")){
+                let rolename = tags[manytags[i].toUpperCase()] // Указать название роли по соответствию с тэгом
+                let role = message.guild.roles.find(r => r.name == rolename); // Найти эту роль на discord сервере.
+                let reqchat = message.guild.channels.find(c => c.name == `requests-for-roles`); // Найти чат на сервере.
                 if (!role){
                     message.reply(`\`Ошибка выполнения. Роль ${rolename} не была найдена.\``)
                     return console.error(`Роль ${rolename} не найдена!`);
@@ -264,40 +316,27 @@ bot.on('message', async message => {
                     return console.error(`Канал requests-for-roles не был найден!`)
                 }
                 if (message.member.roles.some(r => [rolename].includes(r.name))){
-                    return message.react(`👌`)
+                    return message.react(`👌`) // Если роль есть, поставить окей.
                 }
-                if (sened.has(message.member.displayName)) return message.react(`🕖`)
+                if (sened.has(message.member.displayName)) return message.react(`🕖`) // Если уже отправлял - поставить часы.
                 let nickname = message.member.displayName;
                 const embed = new Discord.RichEmbed()
                 .setTitle("`Discord » Проверка на валидность ник нейма.`")
-                .setColor("#FF0000")
+                .setColor("#483D8B")
+                .addField("Аккаунт", `\`Пользователь:\` <@${message.author.id}>`, true)
+                .addField("Никнейм", `\`Ник:\` ${nickname}`, true)
+                .addField("Роль для выдачи", `\`Роль для выдачи:\` <@&${role.id}>`)
+                .addField("Отправлено с канала", `<#${message.channel.id}>`)
+                .addField("Информация по выдачи", `\`[✔] - выдать роль\`\n` + `\`[❌] - отказать в выдачи роли\`\n` + `\`[D] - удалить сообщение\``)
                 .setFooter("© Support Team | by Kory_McGregor")
                 .setTimestamp()
-                .addField("Аккаунт", `\`Пользователь:\` <@${message.author.id}>\n\`Ник:\`  \`${nickname}\``, true)
-                .addField("Роль для выдачи", `\`Роль для выдачи:\` <@&${role.id}>`, true)
-                .addField("Сообщение", `\`Сообщение:\`  \`${message.content}\``)
-                .addField("Информация по выдачи",
-                `\`[✔] - выдать роль\`\n` + 
-                `\`[❌] - отказать в выдачи роли\`\n` +
-                `\`[D] - удалить сообщение\``)
                 reqchat.send(embed).then(async msgsen => {
                     await msgsen.react('✔')
                     await msgsen.react('❌')
                     await msgsen.react('🇩')
-                    requests[msgsen.id] = {
-                        "status": "wait",
-                        "supernickname": nickname,
-                        "whogetrole": message.author.id,
-                        "superrole": role.name,
-                        "channel": message.channel.id,
-                        "suptag": manytags[i],
-                    };
-                    fs.writeFileSync("./database/requests.json", JSON.stringify(requests), (err) => {
-                        return console.error(`Произошла ошибка. ${err}`)
-                    });
                     await msgsen.pin();
                 })
-                sened.add(message.member.displayName);
+                sened.add(message.member.displayName); // Пометить данный ник, что он отправлял запрос.
                 return message.react(`📨`);
             }
         }
@@ -305,172 +344,152 @@ bot.on('message', async message => {
 });
 
 bot.on('raw', async event => {
-    if (!events.hasOwnProperty(event.t)) return;
-
+    if (!events.hasOwnProperty(event.t)) return; // Если не будет добавление или удаление смайлика, то выход
     if (event.t == "MESSAGE_REACTION_ADD"){
-        let event_userid = event.d.user_id
-        let event_messageid = event.d.message_id
-        let event_emoji_name = event.d.emoji.name
-        let event_channelid = event.d.channel_id
-        let event_guildid = event.d.guild_id
-        if (event_guildid != "325607843547840522") return
-        if (event_userid == bot.user.id) return
-        let requser = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == event_userid);
-        let reqchannel = bot.guilds.find(g => g.id == event_guildid).channels.find(c => c.id == event_channelid);
+        let event_guildid = event.d.guild_id // ID discord сервера
+        let event_channelid = event.d.channel_id // ID канала
+        let event_userid = event.d.user_id // ID того кто поставил смайлик
+        let event_messageid = event.d.message_id // ID сообщение куда поставлен смайлик
+        let event_emoji_name = event.d.emoji.name // Название смайлика
 
-        bot.guilds.find(g => g.id == event_guildid).channels.find(c => c.id == event_channelid).fetchMessage(event_messageid).then(msg => {
-            if (!msg) return
-        })
+        if (event_userid == bot.user.id) return // Если поставил смайлик бот то выход
+        if (event_guildid != serverid) return // Если сервер будет другой то выход
 
-        if (reqchannel.name != "requests-for-roles") return
+        let server = bot.guilds.find(g => g.id == event_guildid); // Получить сервер из его ID
+        let channel = server.channels.find(c => c.id == event_channelid); // Получить канал на сервере по списку каналов
+        let message = await channel.fetchMessage(event_messageid); // Получить сообщение из канала
+        let member = server.members.find(m => m.id == event_userid); // Получить пользователя с сервера
+
+        if (channel.name != `requests-for-roles`) return // Если название канала не будет 'requests-for-roles', то выйти
 
         if (event_emoji_name == "🇩"){
-            if (reqrem[event_messageid]){
-                if (reqrem[event_messageid].userrem == undefined){
-                    reqchannel.send(`\`[DELETED]\` <@${requser.id}> \`удалил багнутый запрос.\``)
-                    reqrem[event_messageid] = {
-                        "status": "deleted",
-                    };
-                    fs.writeFileSync("./database/requests remove.json", JSON.stringify(reqrem), (err) => {
-                        return console.error(`Произошла ошибка: ${err}`)
-                    });
-                    return reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
+            if (!message.embeds[0]){
+                channel.send(`\`[DELETED]\` ${member} \`удалил багнутый запрос.\``);
+                return message.delete();
+            }else if (message.embeds[0].title == "`Discord » Проверка на валидность ник нейма.`"){
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_nickname = message.embeds[0].fields[1].value.split(`\`Ник:\` `)[1];
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                if (!field_user || !field_nickname || !field_role || !field_channel){
+                    channel.send(`\`[DELETED]\` ${member} \`удалил багнутый запрос.\``);
                 }else{
-                    let usernick = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == reqrem[event_messageid].userrem);
-                    reqchannel.send(`\`[DELETED]\` <@${requser.id}> \`удалил запрос от: ${usernick.nickname}, с ID: ${reqrem[event_messageid].userrem}\``)
-                    reqrem[event_messageid] = {
-                        "status": "deleted",
-                    };
-                    fs.writeFileSync("./database/requests remove.json", JSON.stringify(reqrem), (err) => {
-                        return console.error(`Произошла ошибка: ${err}`)
-                    });
-                    return reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
+                    channel.send(`\`[DELETED]\` ${member} \`удалил запрос от ${field_nickname}, с ID: ${field_user.id}\``);
                 }
-            }
-
-            if (!requests[event_messageid]){
-                reqchannel.send(`\`[DELETED]\` <@${requser.id}> \`удалил багнутый запрос.\``)
-            }else{
-                if (requests[event_messageid].supernickname == undefined){
-                    reqchannel.send(`\`[DELETED]\` <@${requser.id}> \`удалил багнутый запрос.\``)
+                if (sened.has(field_nickname)) sened.delete(field_nickname); // Отметить ник, что он не отправлял запрос
+                return message.delete();
+            }else if (message.embeds[0].title == '`Discord » Запрос о снятии роли.`'){
+                let field_author = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[1].value.split(/ +/)[1]);
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                if (!field_author || !field_user || !field_role || !field_channel){
+                    channel.send(`\`[DELETED]\` ${member} \`удалил багнутый запрос на снятие роли.\``);
                 }else{
-                    sened.delete(requests[event_messageid].supernickname);
-                    reqchannel.send(`\`[DELETED]\` <@${requser.id}> \`удалил запрос от: ${requests[event_messageid].supernickname}, с ID: ${requests[event_messageid].whogetrole}\``)
+                    channel.send(`\`[DELETED]\` ${member} \`удалил запрос на снятие роли от ${field_author.displayName}, с ID: ${field_author.id}\``);
                 }
+                if (snyatie.has(field_author.id + `=>` + field_user.id)) snyatie.delete(field_author.id + `=>` + field_user.id)
+                return message.delete();
             }
-            requests[event_messageid] = {
-                "status": "deleted",
-            };
-            fs.writeFileSync("./database/requests.json", JSON.stringify(requests), (err) => {
-                return console.error(`Произошла ошибка: ${err}`)
-            });
-            return reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
-        }
-
-        if (event_emoji_name == "❌"){
-            if (!requests[event_messageid]){
-                reqchannel.send(`\`[ERROR]\` <@${requser.id}> \`сообщение не загрузилось! Попробуйте еще раз. Если забагалось - удалите.\``);
-                return
+        }else if(event_emoji_name == "❌"){
+            if (message.embeds[0].title == '`Discord » Проверка на валидность ник нейма.`'){
+                if (message.reactions.size != 3){
+                    return channel.send(`\`[ERROR]\` \`Не торопись! Сообщение еще загружается!\``)
+                }
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_nickname = message.embeds[0].fields[1].value.split(`\`Ник:\` `)[1];
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                channel.send(`\`[DENY]\` <@${member.id}> \`отклонил запрос от ${field_nickname}, с ID: ${field_user.id}\``);
+                field_channel.send(`<@${field_user.id}>**,** \`модератор\` <@${member.id}> \`отклонил ваш запрос на выдачу роли.\nВаш ник при отправке: ${field_nickname}\nУстановите ник на: [Фракция] Имя_Фамилия [Ранг]\``)
+                nrpnames.add(field_nickname); // Добавить данный никнейм в список невалидных
+                if (sened.has(field_nickname)) sened.delete(field_nickname); // Отметить ник, что он не отправлял запрос
+                return message.delete();
+            }else if (message.embeds[0].title == '`Discord » Запрос о снятии роли.`'){
+                if (message.reactions.size != 3){
+                    return channel.send(`\`[ERROR]\` \`Не торопись! Сообщение еще загружается!\``)
+                }
+                let field_author = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[1].value.split(/ +/)[1]);
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                if (member.id == field_user.id) return channel.send(`\`[ERROR]\` \`${member.displayName} свои запросы отклонять нельзя!\``).then(msg => msg.delete(5000))
+                if (!field_user.roles.some(r => r.id == field_role.id)){
+                    if (snyatie.has(field_author.id + `=>` + field_user.id)) snyatie.delete(field_author.id + `=>` + field_user.id)
+                    return message.delete();
+                }
+                channel.send(`\`[DENY]\` <@${member.id}> \`отклонил запрос на снятие роли от\` <@${field_author.id}>\`, с ID: ${field_author.id}\``);
+                field_channel.send(`<@${field_author.id}>**,** \`модератор\` <@${member.id}> \`отклонил ваш запрос на снятие роли пользователю:\` <@${field_user.id}>`)
+                if (snyatie.has(field_author.id + `=>` + field_user.id)) snyatie.delete(field_author.id + `=>` + field_user.id)
+                return message.delete();
             }
-            reqchannel.send(`\`[DENY]\` <@${requser.id}> \`отклонил запрос от ${requests[event_messageid].supernickname}, с ID: ${requests[event_messageid].whogetrole}\``);
-            let userto = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == requests[event_messageid].whogetrole);
-            let channelto = bot.guilds.find(g => g.id == event_guildid).channels.find(c => c.id == requests[event_messageid].channel);
-            channelto.send(`<@${userto.id}>**,** \`модератор\` <@${requser.id}> \`отклонил ваш запрос на выдачу роли.\nВаш ник при отправке: ${requests[event_messageid].supernickname}\nВалидный ник: [${requests[event_messageid].suptag} Ранг/10] Имя_Фамилия\``)
-            requests[event_messageid] = {
-                "status": "deny",
-            };
-            fs.writeFileSync("./database/requests.json", JSON.stringify(requests), (err) => {
-                return console.error(`Произошла ошибка: ${err}`)
-            });
-            blacklist[userto.displayName] = {
-                "moderatorid": requser.id,
-            };
-            fs.writeFileSync("./database/blacklist names.json", JSON.stringify(blacklist), (err) => {
-                return console.error(`Произошла ошибка ${err}`);
-            });
-            sened.delete(requests[event_messageid].supernickname);
-
-            if(userto.roles.some(r=>rolesgg.includes(r.name)) ) {
-                for (var i in rolesgg){
-                    let rolerem = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == rolesgg[i]);
-                    if (userto.roles.some(role=>[rolesgg[i]].includes(role.name))){
-                        await userto.removeRole(rolerem);
+        }else if (event_emoji_name == "✔"){
+            if (message.embeds[0].title == '`Discord » Проверка на валидность ник нейма.`'){
+                if (message.reactions.size != 3){
+                    return channel.send(`\`[ERROR]\` \`Не торопись! Сообщение еще загружается!\``)
+                }
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_nickname = message.embeds[0].fields[1].value.split(`\`Ник:\` `)[1];
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                if (field_user.roles.some(r => field_role.id == r.id)){
+                    if (sened.has(field_nickname)) sened.delete(field_nickname); // Отметить ник, что он не отправлял запрос
+                    return message.delete(); // Если роль есть, то выход
+                }
+                let rolesremoved = false;
+                let rolesremovedcount = 0;
+                if (field_user.roles.some(r=>rolesgg.includes(r.name))) {
+                    for (var i in rolesgg){
+                        let rolerem = server.roles.find(r => r.name == rolesgg[i]);
+                        if (field_user.roles.some(role=>[rolesgg[i]].includes(role.name))){
+                            rolesremoved = true;
+                            rolesremovedcount = rolesremovedcount+1;
+                            await field_user.removeRole(rolerem); // Забрать фракционные роли
+                        }
                     }
                 }
-            }
-            let krimrole = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == `✦ Криминал ✦`);
-            let govrole = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == `★ Гос.Сотрудник ★`);
-            if (userto.roles.some(r => r == krimrole)){
-                await userto.removeRole(krimrole)
-            }
-            if (userto.roles.some(r => r == govrole)){
-                await userto.removeRole(govrole)
-            }
-
-            return reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
-        }
-
-        if (event_emoji_name == "✔"){
-            if (!requests[event_messageid]){
-                if (!reqrem[event_messageid]){
-                    return reqchannel.send(`\`[ERROR]\` <@${requser.id}> \`сообщение не загрузилось! Попробуйте еще раз. Если забагалось - удалите.\``);
-                }else{
-                    let userremto = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == reqrem[event_messageid].userrem);
-                    let whoremto = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == reqrem[event_messageid].whorem)
-                    let roleremto = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == reqrem[event_messageid].rolerem);
-                    if (userremto.roles.some(r => [roleremto.name].includes(r.name))){
-                        userremto.removeRole(roleremto)
-                        reqchannel.send(`\`[ACCEPT]\` <@${requser.id}> \`одобрил запрос на снятие роли от ${whoremto.displayName}, с ID: ${whoremto.id} пользователю:\` <@${userremto.id}>`);
-                        reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
+                await field_user.addRole(field_role); // Выдать роль по соответствию с тэгом
+                let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
+                if (!field_user.roles.some(r => r == govrole) && gos.includes(field_role.name)){
+                    await message.member.addRole(govrole)
+                }
+                channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил запрос от ${field_nickname}, с ID: ${field_user.id}\``);
+                if (rolesremoved){
+                    if (rolesremovedcount == 1){
+                        field_channel.send(`<@${field_user.id}>**,** \`модератор\` <@${member.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${field_role.id}>  \`была выдана! ${rolesremovedcount} роль другой фракции была убрана.\``)
+                    }else if (rolesremovedcount < 5){
+                        field_channel.send(`<@${field_user.id}>**,** \`модератор\` <@${member.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${field_role.id}>  \`была выдана! Остальные ${rolesremovedcount} роли других фракций были убраны.\``)
                     }else{
-                        reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
+                        field_channel.send(`<@${field_user.id}>**,** \`модератор\` <@${member.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${field_role.id}>  \`была выдана! Остальные ${rolesremovedcount} ролей других фракций были убраны.\``)
                     }
-                    return
-                }
-            }
-            let userto = bot.guilds.find(g => g.id == event_guildid).members.find(m => m.id == requests[event_messageid].whogetrole);
-            let channelto = bot.guilds.find(g => g.id == event_guildid).channels.find(c => c.id == requests[event_messageid].channel);
-            let roleto = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == requests[event_messageid].superrole);
-            reqchannel.fetchMessage(event_messageid).then(msg => msg.delete());
-            if (userto.roles.some(r => roleto.name.includes(r.name))) return
-            let rolesremoved = false;
-            let rolesremovedcount = 0;
-            if(userto.roles.some(r=>rolesgg.includes(r.name)) ) {
-                for (var i in rolesgg){
-                    let rolerem = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == rolesgg[i]);
-                    if (userto.roles.some(role=>[rolesgg[i]].includes(role.name))){
-                        rolesremoved = true;
-                        rolesremovedcount = rolesremovedcount+1;
-                        await userto.removeRole(rolerem);
-                    }
-                }
-            }
-            let krimrole = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == `✦ Криминал ✦`);
-            let govrole = bot.guilds.find(g => g.id == event_guildid).roles.find(r => r.name == `★ Гос.Сотрудник ★`);
-            if (krominal.some(r => r == roleto.name)){
-                if (krimrole) userto.addRole(krimrole)
-                if (userto.roles.some(r => r.name == `★ Гос.Сотрудник ★`) && govrole) userto.removeRole(govrole)
-            }
-            if (gos.some(r => r == roleto.name)){
-                if (govrole) userto.addRole(govrole)
-                if (userto.roles.some(r => r.name == `✦ Криминал ✦`) && krimrole) userto.removeRole(krimrole)
-            }
-
-            await userto.addRole(roleto);
-            reqchannel.send(`\`[ACCEPT]\` <@${requser.id}> \`одобрил запрос от ${requests[event_messageid].supernickname}, с ID: ${requests[event_messageid].whogetrole}\``);
-            if (rolesremoved){
-                if (rolesremovedcount == 1){
-                    channelto.send(`<@${userto.id}>**,** \`модератор\` <@${requser.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${roleto.id}>  \`была выдана! ${rolesremovedcount} роль другой фракции была убрана.\``)
-                }else if (rolesremovedcount < 5){
-                    channelto.send(`<@${userto.id}>**,** \`модератор\` <@${requser.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${roleto.id}>  \`была выдана! Остальные ${rolesremovedcount} роли других фракций были убраны.\``)
                 }else{
-                    channelto.send(`<@${userto.id}>**,** \`модератор\` <@${requser.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${roleto.id}>  \`была выдана! Остальные ${rolesremovedcount} ролей других фракций были убраны.\``)
+                    field_channel.send(`<@${field_user.id}>**,** \`модератор\` <@${member.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${field_role.id}>  \`была выдана!\``)
                 }
-            }else{
-                channelto.send(`<@${userto.id}>**,** \`модератор\` <@${requser.id}> \`одобрил ваш запрос на выдачу роли.\`\n\`Роль\`  <@&${roleto.id}>  \`была выдана!\``)
+                if (sened.has(field_nickname)) sened.delete(field_nickname); // Отметить ник, что он не отправлял запрос
+                return message.delete();
+            }else if (message.embeds[0].title == '`Discord » Запрос о снятии роли.`'){
+                if (message.reactions.size != 3){
+                    return channel.send(`\`[ERROR]\` \`Не торопись! Сообщение еще загружается!\``)
+                }
+                let field_author = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[0].value.split(/ +/)[1]);
+                let field_user = server.members.find(m => "<@" + m.id + ">" == message.embeds[0].fields[1].value.split(/ +/)[1]);
+                let field_role = server.roles.find(r => "<@&" + r.id + ">" == message.embeds[0].fields[2].value.split(/ +/)[3]);
+                let field_channel = server.channels.find(c => "<#" + c.id + ">" == message.embeds[0].fields[3].value.split(/ +/)[0]);
+                if (member.id == field_user.id) return channel.send(`\`[ERROR]\` \`${member.displayName} свои запросы принимать нельзя!\``).then(msg => msg.delete(5000))
+                if (!field_user.roles.some(r => r.id == field_role.id)){
+                    if (snyatie.has(field_author.id + `=>` + field_user.id)) snyatie.delete(field_author.id + `=>` + field_user.id)
+                    return message.delete();
+                }
+                field_user.removeRole(field_role);
+                let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
+                if (field_user.roles.some(r => r == govrole) && gos.includes(field_role.name)){
+                    await message.member.removeRole(govrole)
+                }
+                channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил снятие роли (${field_role.name}) от\` <@${field_author.id}>, \`пользователю\` <@${field_user.id}>, \`с ID: ${field_user.id}\``);
+                field_channel.send(`**<@${field_user.id}>, с вас сняли роль**  <@&${field_role.id}>  **по запросу от <@${field_author.id}>.**`)
+                if (snyatie.has(field_author.id + `=>` + field_user.id)) snyatie.delete(field_author.id + `=>` + field_user.id)
+                return message.delete()
             }
-            return sened.delete(requests[event_messageid].supernickname);
         }
-
     }
 });
