@@ -450,7 +450,7 @@ bot.on('raw', async event => {
                     }
                 }
                 await field_user.addRole(field_role); // Выдать роль по соответствию с тэгом
-                let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
+                let govrole = server.roles.find(r => r.name == `✦ Сотрудник Гос.Структур ✦`);
                 if (!field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.addRole(govrole)
                 }
@@ -482,7 +482,7 @@ bot.on('raw', async event => {
                     return message.delete();
                 }
                 field_user.removeRole(field_role);
-                let govrole = server.roles.find(r => r.name == `★ Гос.Сотрудник ★`);
+                let govrole = server.roles.find(r => r.name == `✦ Сотрудник Гос.Структур ✦`);
                 if (field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.removeRole(govrole)
                 }
