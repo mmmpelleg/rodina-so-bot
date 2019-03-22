@@ -564,8 +564,8 @@ bot.on('message', async message => {
         message.channel.send(`**<@${message.author.id}>, вот справка по системе семей!**`, {embed: {
             color: 3447003,
             fields: [{
-                name: `Создание, удаление, информация`,
-                value: `**Создать семью:** \`/createfam\`\n**Удалить семью:** \`/deletefam [название]\`\n**Информация о семье:** \`/faminfo [название]\``,
+                name: `Команды модератора`,
+                value: `**Создать семью:** \`/createfam\`\n**Удалить семью:** \`/deletefam [название]\`\n**Информация о семье:** \`/faminfo [название]\`\n**Вступить как заместитель:** \`/getzamfam [название]\``,
             },
             {
                 name: `Управление семьей`,
@@ -615,7 +615,7 @@ bot.on('message', async message => {
                         })
                     }
                 }
-            }else if(channel.name.includes(familyname)){
+            }else if(channel.name.toLowerCase().includes(familyname.toLowerCase())){
                 if (channel.type == "voice"){
                     if (channel.parent.name.toString() == `Family ROOMS`){
                         family_channel = channel;
@@ -646,7 +646,7 @@ bot.on('message', async message => {
             return message.delete();
         }
         if (!family_leader){
-            family_leader = `не в дискорде`;
+            family_leader = `не назначен`;
         }else{
             family_leader = `<@${family_leader.id}>`;
         }
@@ -805,7 +805,7 @@ bot.on('message', async message => {
                                 })
                             }
                             await message.guild.members.find(m => m.id == family_leader).addRole(family_role);
-                            let general = message.guild.channels.find(c => c.name == `general`);
+                            let general = message.guild.channels.find(c => c.name == `чат`);
                             if (general) await general.send(`<@${family_leader}>, \`модератор\` <@${idmember}> \`назначил вас контролировать семью: ${family_name}\``)
                             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
                             if (fam_chat) await fam_chat.send(`\`[CREATE]\` \`Пользователь\` <@${family_leader}> \`стал лидером семьи '${family_name}'! Назначил:\` <@${idmember}>`);
@@ -884,7 +884,7 @@ bot.on('message', async message => {
                 return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
             }
             if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[0]}'! Пригласил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[0]}'\``);
@@ -936,7 +936,7 @@ bot.on('message', async message => {
                 return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
             }
             if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[args[2]]}'! Пригласил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[args[2]]}'\``);
@@ -998,7 +998,7 @@ bot.on('message', async message => {
             }
             message.delete();
             if (user.roles.some(r => r.id == fam_role.id)) user.removeRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`вы были исключены из семьи '${families[0]}'! Источник:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[KICK]\` <@${message.author.id}> \`выгнал пользователя\` <@${user.id}> \`из семьи: '${families[0]}'\``);
@@ -1043,7 +1043,7 @@ bot.on('message', async message => {
             }
             message.delete();
             if (user.roles.some(r => r.id == fam_role.id)) user.removeRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`вы были исключены из семьи '${families[args[2]]}'! Источник:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[KICK]\` <@${message.author.id}> \`выгнал пользователя\` <@${user.id}> \`из семьи: '${families[args[2]]}'\``);
@@ -1090,7 +1090,7 @@ bot.on('message', async message => {
         }
         family_channel.delete();
         family_role.delete();
-        let general = message.guild.channels.find(c => c.name == `general`);
+        let general = message.guild.channels.find(c => c.name == `чат`);
         if (general) await general.send(`<@${family_leader.id}>, \`модератор\` <@${message.author.id}> \`удалил вашу семью: ${name}\``)
         let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
         if (fam_chat) await fam_chat.send(`\`[DELETED]\` \`Семья '${name}', главой которой был\` <@${family_leader.id}> \`была удалена модератором. Удалил:\` <@${message.author.id}>`);
@@ -1174,7 +1174,7 @@ bot.on('message', async message => {
                 USE_VAD: true,
                 PRIORITY_SPEAKER: true,
             })
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь заместителем семьи '${families[0]}'! Назначил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[RANK]\` <@${message.author.id}> \`назначил заместителя\` <@${user.id}> \`семья: '${families[0]}'\``);
@@ -1236,7 +1236,7 @@ bot.on('message', async message => {
                 USE_VAD: true,
                 PRIORITY_SPEAKER: true,
             })
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь заместителем семьи '${families[args[2]]}'! Назначил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[RANK]\` <@${message.author.id}> \`назначил заместителем\` <@${user.id}> \`семья: '${families[args[2]]}'\``);
@@ -1305,7 +1305,7 @@ bot.on('message', async message => {
                 return message.delete();
             }
             message.delete();
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`вы были изгнаны с поста заместителя семьи '${families[0]}'! Снял:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[RANK]\` <@${message.author.id}> \`снял заместителя\` <@${user.id}> \`семья: '${families[0]}'\``);
@@ -1352,12 +1352,60 @@ bot.on('message', async message => {
                 return message.delete();
             }
             message.delete();
-            let general = message.guild.channels.find(c => c.name == `general`);
+            let general = message.guild.channels.find(c => c.name == `чат`);
             if (general) await general.send(`<@${user.id}>, \`вы были изгнаны с поста заместителя семьи '${families[args[2]]}'! Снял:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[RANK]\` <@${message.author.id}> \`снял заместителя\` <@${user.id}> \`семья: '${families[args[2]]}'\``);
             return
         }
+    }
+
+    if (message.content.startsWith(`/getzamfam`)){
+        if (message.content == `/getzamfam`){
+            message.channel.send(`\`[ERROR]\` <@${message.author.id}> \`использование: /getzamfam [family]\``).then(msg => msg.delete(10000));
+            return message.delete();
+        }
+        const args = message.content.slice('/getzamfam').split(/ +/)
+
+        let fam_channel;
+        await message.guild.channels.filter(async channel => {
+            if (channel.name == args.slice(1).join(" ")){
+                if (channel.type == "voice"){
+                    if (channel.parent.name.toString() == `Family ROOMS`){
+                        fam_channel = channel;
+                    }
+                }
+            }else if(channel.name.toLowerCase().includes(args.slice(1).join(" ").toLowerCase())){
+                if (channel.type == "voice"){
+                    if (channel.parent.name.toString() == `Family ROOMS`){
+                        fam_channel = channel;
+                    }
+                }
+            }
+        });
+        if (!fam_channel){
+            message.reply(`\`семья не найдена!\``).then(msg => msg.delete(12000));
+            return message.delete();
+        }
+        message.delete();
+        await fam_channel.overwritePermissions(message.member, {
+            // GENERAL PERMISSIONS
+            CREATE_INSTANT_INVITE: false,
+            MANAGE_CHANNELS: false,
+            MANAGE_ROLES: false,
+            MANAGE_WEBHOOKS: false,
+            // VOICE PERMISSIONS
+            VIEW_CHANNEL: true,
+            CONNECT: true,
+            SPEAK: true,
+            MUTE_MEMBERS: false,
+            DEAFEN_MEMBERS: false,
+            MOVE_MEMBERS: false,
+            USE_VAD: true,
+            PRIORITY_SPEAKER: true,
+        })
+        message.reply(`<@${message.author.id}> \`вы стали заместителем семьи: '${fam_channel.name}'\``).then(msg => msg.delete(12000));
+        return
     }
     
     if (message.content.startsWith("/embfield")){
