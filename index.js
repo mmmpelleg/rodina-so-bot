@@ -1832,13 +1832,18 @@ bot.on('raw', async event => {
                             rolesremoved = true;
                             rolesremovedcount = rolesremovedcount+1;
                             await field_user.removeRole(rolerem); // Забрать фракционные роли
+                            await field_user.removeRole(server.roles.find(r => r.name == `★ Государственные структуры ★`));
+                            await field_user.removeRole(server.roles.find(r => r.name == `❖ ОПГ ❖`));
                         }
                     }
                 }
                 await field_user.addRole(field_role); // Выдать роль по соответствию с тэгом
                 let govrole = server.roles.find(r => r.name == `★ Государственные структуры ★`);
+                let mafia_role = server.roles.find(r => r.name == `❖ ОПГ ❖`);
                 if (!field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.addRole(govrole)
+                }else if (!field_user.roles.some(r => r.id == mafia_role) && !gos.includes(field_role.name)){
+                    await field_user.addRole(mafia_role)
                 }
                 channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил запрос от ${field_nickname}, с ID: ${field_user.id}\``);
                 if (rolesremoved){
@@ -1869,8 +1874,11 @@ bot.on('raw', async event => {
                 }
                 field_user.removeRole(field_role);
                 let govrole = server.roles.find(r => r.name == `★ Государственные структуры ★`);
+                let mafia_role = server.roles.find(r => r.name == `❖ ОПГ ❖`);
                 if (field_user.roles.some(r => r.id == govrole.id) && gos.includes(field_role.name)){
                     await field_user.removeRole(govrole)
+                }else if (field_user.roles.some(r => r.id == mafia_role.id) && !gos.includes(field_role.id)){
+                    await field_user.removeRole(mafia_role)
                 }
                 channel.send(`\`[ACCEPT]\` <@${member.id}> \`одобрил снятие роли (${field_role.name}) от\` <@${field_author.id}>, \`пользователю\` <@${field_user.id}>, \`с ID: ${field_user.id}\``);
                 field_channel.send(`**<@${field_user.id}>, с вас сняли роль**  <@&${field_role.id}>  **по запросу от <@${field_author.id}>.**`)
