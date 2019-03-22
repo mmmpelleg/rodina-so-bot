@@ -561,7 +561,7 @@ bot.on('message', async message => {
     }
 
     if (message.content.toLowerCase() == '/famhelp'){
-        message.channel.send(`**<@${message.author.id}>, вот справка по системе семей!**`, {embed: {
+        message.member.sendMessage(`**<@${message.author.id}>, вот справка по системе семей!**`, {embed: {
             color: 3447003,
             fields: [{
                 name: `Команды модератора`,
@@ -575,7 +575,24 @@ bot.on('message', async message => {
                 name: `Команды для заместителей`,
                 value: `**Пригласить участника:** \`/faminvite [user]\`\n**Исключить участника:** \`/famkick [user]\``,
             }]
-        }}).then(msg => msg.delete(35000))
+        }}).then(msg => msg.delete(35000)).catch(async () => {
+            message.channel.send(`**<@${message.author.id}>, вот справка по системе семей!**`, {embed: {
+                color: 3447003,
+                fields: [{
+                    name: `Команды модератора`,
+                    value: `**Создать семью:** \`/createfam\`\n**Удалить семью:** \`/deletefam [название]\`\n**Информация о семье:** \`/faminfo [название]\`\n**Вступить как заместитель:** \`/getzamfam [название]\``,
+                },
+                {
+                    name: `Управление семьей`,
+                    value: `**Назначить заместителя:** \`/famaddzam [user]\`\n**Снять заместителя:** \`/famdelzam [user]\``,
+                },
+                {
+                    name: `Команды для заместителей`,
+                    value: `**Пригласить участника:** \`/faminvite [user]\`\n**Исключить участника:** \`/famkick [user]\``,
+                }]
+            }}).then(msg => msg.delete(35000))
+        });
+        message.react('✔');
         return message.delete();
     }
     
@@ -881,6 +898,7 @@ bot.on('message', async message => {
             const reactions = await msg.awaitReactions(reaction => reaction.emoji.name === `✔`, {time: 10000});
             let reacton = reactions.get(`✔`).users.get(user.id)
             if (reacton == undefined){
+                msg.delete();
                 return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
             }
             if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
@@ -888,7 +906,7 @@ bot.on('message', async message => {
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[0]}'! Пригласил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[0]}'\``);
-            return
+            return msg.delete();
         }else{
             if (!args[2]){
                 let familiesall = null;
@@ -933,6 +951,7 @@ bot.on('message', async message => {
             const reactions = await msg.awaitReactions(reaction => reaction.emoji.name === `✔`, {time: 10000});
             let reacton = reactions.get(`✔`).users.get(user.id)
             if (reacton == undefined){
+                msg.delete();
                 return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
             }
             if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
@@ -940,7 +959,7 @@ bot.on('message', async message => {
             if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[args[2]]}'! Пригласил:\` <@${message.author.id}>`);
             let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
             if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[args[2]]}'\``);
-            return
+            return msg.delete();
         }
     }
 
@@ -1361,6 +1380,7 @@ bot.on('message', async message => {
     }
 
     if (message.content.startsWith(`/getzamfam`)){
+        if (!message.member.hasPermission("ADMINISTRATOR")) return message.reply(`\`эй! Эта функция только для модераторов!\``) && message.delete()
         if (message.content == `/getzamfam`){
             message.channel.send(`\`[ERROR]\` <@${message.author.id}> \`использование: /getzamfam [family]\``).then(msg => msg.delete(10000));
             return message.delete();
@@ -1385,9 +1405,8 @@ bot.on('message', async message => {
         });
         if (!fam_channel){
             message.reply(`\`семья не найдена!\``).then(msg => msg.delete(12000));
-            return message.delete();
+            return message.react(`❌`);
         }
-        message.delete();
         await fam_channel.overwritePermissions(message.member, {
             // GENERAL PERMISSIONS
             CREATE_INSTANT_INVITE: false,
@@ -1403,9 +1422,8 @@ bot.on('message', async message => {
             MOVE_MEMBERS: false,
             USE_VAD: true,
             PRIORITY_SPEAKER: true,
-        })
-        message.reply(`<@${message.author.id}> \`вы стали заместителем семьи: '${fam_channel.name}'\``).then(msg => msg.delete(12000));
-        return
+        });
+        return message.react('✔');
     }
     
     if (message.content.startsWith("/embfield")){
