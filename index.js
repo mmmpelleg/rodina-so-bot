@@ -747,7 +747,7 @@ bot.on('message', async message => {
 
                         let family_role = await message.guild.createRole({
                             name: `${family_name}`,
-                            position: message.guild.roles.find(r => r.name == `[-] Прочее [-]`).position + 1,
+                            position: message.guild.roles.find(r => r.name == `✦ Заслуженный участник [Discord] ✦`).position + 1,
                         })
                         await message.guild.createChannel(`${family_name}`, "voice").then(async (channel) => {
                             await channel.setParent(message.guild.channels.find(c => c.name == `Family ROOMS`))
