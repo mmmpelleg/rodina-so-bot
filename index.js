@@ -840,7 +840,7 @@ bot.on('message', async message => {
         })
     }
     
-    if (message.content.startsWith(`/faminvite`)){
+if (message.content.startsWith(`/faminvite`)){
         if (message.content == `/faminvite`){
             message.channel.send(`\`[ERROR]\` <@${message.author.id}> \`использование: /faminvite [user]\``).then(msg => msg.delete(10000));
             return message.delete();
@@ -893,20 +893,30 @@ bot.on('message', async message => {
                 return message.delete();
             }
             message.delete();
-            let msg = await message.channel.send(`<@${user.id}>, \`создатель или заместитель семьи\` <@${message.author.id}> \`приглашает вас вступить в семью:\` **<@&${fam_role.id}>**\n\`Нажмите галочку в течении 10 секунд, если вы согласны принять его приглашение!\``)
+            let msg = await message.channel.send(`<@${user.id}>, \`создатель или заместитель семьи\` <@${message.author.id}> \`приглашает вас вступить в семью:\` **<@&${fam_role.id}>**\n\`Нажмите галочку в течении 10 секунд, если вы согласны принять его приглашение!\``);
             await msg.react(`✔`);
-            const reactions = await msg.awaitReactions(reaction => reaction.emoji.name === `✔`, {time: 10000});
-            let reacton = reactions.get(`✔`).users.get(user.id)
-            if (reacton == undefined){
-                msg.delete();
-                return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
-            }
-            if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `чат`);
-            if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[0]}'! Пригласил:\` <@${message.author.id}>`);
-            let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
-            if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[0]}'\``);
-            return msg.delete();
+            await msg.react(`❌`);
+            const filter = (reaction, user_need) => {
+                return ['✔', '❌'].includes(reaction.emoji.name) && user_need.id === user.id;
+            };
+
+            msg.awaitReactions(filter, { max: 1, time: 20000, errors: ['time'] }).then(async collected => {
+                const reaction = collected.first();
+                if (reaction.emoji.name === '✔') {
+                    if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
+                    let general = message.guild.channels.find(c => c.name == `communication💬`);
+                    if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[0]}'! Пригласил:\` <@${message.author.id}>`);
+                    let fam_chat = message.guild.channels.find(c => c.name == `family_chat`);
+                    if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[0]}'\``);
+                    return msg.delete();
+                } else {
+                    message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
+                    return msg.delete();
+                }
+            }).catch(async collected => {
+                message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} не успел принять ваше предложение!\``).then(msg => msg.delete(15000));
+                return msg.delete();
+            });
         }else{
             if (!args[2]){
                 let familiesall = null;
@@ -948,18 +958,28 @@ bot.on('message', async message => {
             message.delete();
             let msg = await message.channel.send(`<@${user.id}>, \`создатель или заместитель семьи\` <@${message.author.id}> \`приглашает вас вступить в семью:\` **<@&${fam_role.id}>**\n\`Нажмите галочку в течении 10 секунд, если вы согласны принять его приглашение!\``)
             await msg.react(`✔`);
-            const reactions = await msg.awaitReactions(reaction => reaction.emoji.name === `✔`, {time: 10000});
-            let reacton = reactions.get(`✔`).users.get(user.id)
-            if (reacton == undefined){
-                msg.delete();
-                return message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
-            }
-            if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
-            let general = message.guild.channels.find(c => c.name == `чат`);
-            if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[args[2]]}'! Пригласил:\` <@${message.author.id}>`);
-            let fam_chat = message.guild.channels.find(c => c.name == `family-chat`);
-            if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[args[2]]}'\``);
-            return msg.delete();
+            await msg.react(`❌`);
+            const filter = (reaction, user_need) => {
+                return ['✔', '❌'].includes(reaction.emoji.name) && user_need.id === user.id;
+            };
+
+            msg.awaitReactions(filter, { max: 1, time: 20000, errors: ['time'] }).then(async collected => {
+                const reaction = collected.first();
+                if (reaction.emoji.name === '✔') {
+                    if (!user.roles.some(r => r.id == fam_role.id)) user.addRole(fam_role)
+                    let general = message.guild.channels.find(c => c.name == `communication💬`);
+                    if (general) await general.send(`<@${user.id}>, \`теперь вы являетесь участником семьи '${families[args[2]]}'! Пригласил:\` <@${message.author.id}>`);
+                    let fam_chat = message.guild.channels.find(c => c.name == `family_chat`);
+                    if (fam_chat) await fam_chat.send(`\`[INVITE]\` <@${message.author.id}> \`пригласил пользователя\` <@${user.id}> \`в семью: '${families[args[2]]}'\``);
+                    return msg.delete();
+                } else {
+                    message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} отказался от вашего предложения вступить в семью!\``).then(msg => msg.delete(15000));
+                    return msg.delete();
+                }
+            }).catch(async collected => {
+                message.channel.send(`<@${message.author.id}>, \`пользователь ${user.displayName} не успел принять ваше предложение!\``).then(msg => msg.delete(15000));
+                return msg.delete();
+            });
         }
     }
 
